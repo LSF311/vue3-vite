@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, ref ,watch} from "vue";
 import {addBookService, deleteBookService, getAllBookService, updateBookService} from "@/methods/book.js";
 import SideView from "@/components/SideView.vue";
 import HeaderView from "@/components/HeaderView.vue";
@@ -13,13 +13,17 @@ onMounted(async () => {
   await getAllBooks();
 })
 
+
 // 获取所有书籍
 const getAllBooks = async function () {
   loading.value = true;
+  // console.log(loading.value);
   const result = await getAllBookService(condition.value);
+  console.log(result);
   tableData.value = result.data;
   total.value = result.total;
   loading.value = false;
+  // console.log(loading.value);
 };
 
 // 搜索条件
@@ -35,12 +39,25 @@ const condition = ref({
 // 是否加载中
 const loading = ref(false);
 
+// 监听loading变化
+watch(loading, (newValue, oldValue) => {
+  console.log('loading状态变化:', newValue);
+  // 这里可以添加任何当loading变化时需要执行的代码
+  if (newValue === true) {
+    console.log('加载中...');
+    // 执行loading开始时的操作
+  } else {
+    console.log('加载完成');
+    // 执行loading结束时的操作
+  }
+}, { immediate: true }); // immediate: true 会在初始化时也执行一次
+
 // 结果总数
 const total = ref(0)
 
 // 分页大小变化
 const handleSizeChange = (val) => {
-  loading.value = true;
+  // loading.value = true;
   condition.value.pageSize = val;
   getAllBooks();
   loading.value = false;
@@ -48,10 +65,11 @@ const handleSizeChange = (val) => {
 
 // 当前页数发生变化
 const handleCurrentChange = (val) => {
+  console.log('分页变化:', val);
   loading.value = true;
   condition.value.currentPage = val;
   getAllBooks();
-  loading.value = false;
+  // loading.value = false;
 };
 
 let detail = ref(false);

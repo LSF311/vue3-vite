@@ -1,13 +1,14 @@
 <script setup>
-import {useDark} from "@vueuse/core";
-import {useReaderStore} from "@/stores/reader.js";
-import {useAdminStore} from "@/stores/admin.js";
-import {ref} from "vue";
-import {Link, Moon, Sunny, SwitchButton} from "@element-plus/icons-vue";
+import { useDark } from "@vueuse/core";
+import { useReaderStore } from "@/stores/reader.js";
+import { useAdminStore } from "@/stores/admin.js";
+import { ref } from "vue";
+import { Link, Moon, Sunny, SwitchButton } from "@element-plus/icons-vue";
 import router from "@/router/index.js";
-import {logoutService} from "@/methods/logout.js";
-import {ElMessage} from "element-plus";
-import {useTokenStore} from "@/stores/token.js";
+import { logoutService } from "@/methods/logout.js";
+import { ElMessage } from "element-plus";
+import { useTokenStore } from "@/stores/token.js";
+import { backUpService, restoreService } from "@/methods/admin.js"
 
 
 const adminStore = useAdminStore();
@@ -22,11 +23,24 @@ tag.value = isAdmin ? adminStore.admin.nickname : readerStore.reader.nickname;
 
 // 切换深浅色
 const isDark = useDark();
+//备份数据
+const backUP = async () => {
+  await backUpService();
+  ElMessage.success('备份成功');
+}
+//恢复数据
+const restore = async () => {
+  await restoreService();
+  ElMessage.success('数据恢复成功');
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+}
 
 // 头像下拉菜单命令
 const handleCommand = async (command) => {
   switch (command) {
-      // 退出登录
+    // 退出登录
     case "logout":
       await logoutService();
       ElMessage.success("已退出登录!")
@@ -36,11 +50,11 @@ const handleCommand = async (command) => {
       adminStore.clearAdmin();
       await router.push("/login");
       break;
-      // 跳转到前端项目
+    // 跳转到前端项目
     case "frontend":
       window.open("https://github.com/TankingCao/vue3-vite");
       break;
-      // 跳转到后端项目
+    // 跳转到后端项目
     case "backend":
       window.open("https://github.com/TankingCao/java_design");
       break;
@@ -57,13 +71,7 @@ const url = ref("https://pic.imgdb.cn/item/65a271fe871b83018a8f9a8f.gif");
       <!--头像-->
       <el-dropdown @command="handleCommand">
         <el-menu-item index="1">
-          <el-avatar
-              @click="router.push('/user')"
-              shape="square"
-              :size="42"
-              :fit="'cover'"
-              :src="url"
-          />
+          <el-avatar @click="router.push('/user')" shape="square" :size="42" :fit="'cover'" :src="url" />
         </el-menu-item>
         <template #dropdown>
           <el-dropdown-menu>
@@ -76,10 +84,8 @@ const url = ref("https://pic.imgdb.cn/item/65a271fe871b83018a8f9a8f.gif");
             </el-dropdown-item>
 
             <el-dropdown-item command="logout">
-              <el-button link type="danger" :icon="SwitchButton"
-              >退出登录
-              </el-button
-              >
+              <el-button link type="danger" :icon="SwitchButton">退出登录
+              </el-button>
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -99,18 +105,20 @@ const url = ref("https://pic.imgdb.cn/item/65a271fe871b83018a8f9a8f.gif");
         <el-tag v-else size="large" round> 读者</el-tag>
       </el-menu-item>
 
+      <el-menu-item v-if="isAdmin" h="full" @click="backUP">
+        <el-tag size="large" round>数据备份</el-tag>
+      </el-menu-item>
+
+      <el-menu-item v-if="isAdmin" h="full" @click="restore">
+        <el-tag size="large" round>数据恢复</el-tag>
+      </el-menu-item>
+
       <!--深浅色图标-->
       <el-menu-item>
-        <el-switch
-            v-model="isDark"
-            size="large"
-            :active-action-icon="Moon"
-            :inactive-action-icon="Sunny"
-            style="
+        <el-switch v-model="isDark" size="large" :active-action-icon="Moon" :inactive-action-icon="Sunny" style="
             --el-switch-on-color: rgba(19, 206, 102, 0.7);
             --el-switch-off-color: rgb(74,163,252);
-          "
-        />
+          " />
       </el-menu-item>
     </el-menu>
   </div>

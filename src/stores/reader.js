@@ -12,8 +12,12 @@ export const useReaderStore = defineStore('reader', () => {
             gender: '',
             age: '',
             tel: '',
-            token: ''
+            token: '',
+            enable: ''
         });
+        const getUserId = () => {
+            return reader.value.id;
+        }
         const setReader = (data) => {
             reader.value = data;
         }
@@ -26,9 +30,10 @@ export const useReaderStore = defineStore('reader', () => {
             reader.value.age = '';
             reader.value.tel = '';
             reader.value.token = '';
+            reader.value.enable = '';
         }
         return {
-            reader, setReader, clearReader
+            reader, setReader, clearReader,getUserId
         }
     },
     {

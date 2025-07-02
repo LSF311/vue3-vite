@@ -3,7 +3,9 @@ import {
   deleteBorrowBatchService,
   deleteByIdService,
   getBorrowByReaderIdService,
-  returnBookService
+  returnBookService,
+  returnDelayBookService,
+  payBookService
 } from "@/methods/borrow.js";
 import {onMounted, ref} from "vue";
 import HeaderView from "@/components/HeaderView.vue";
@@ -12,6 +14,30 @@ import {ElMessage} from "element-plus";
 import {Delete} from "@element-plus/icons-vue";
 
 const tableData = ref([]);
+
+let book = ref({
+  title: null,
+  isbn: null,
+  cover: null,
+  introduction: null,
+  number: 0,
+  author: null,
+});
+
+const disabledDate = (time) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return time.getTime() < today.getTime();
+};
+
+let showDrawer = ref(false);
+const showBorrow = (row) => {
+  // console.log(row)
+  showDrawer.value = true;
+  book.value = row;
+  console.log("showBorrow book:", book.value);
+  console.log(book.value.id)
+};
 
 onMounted(() => {
   // console.log(new Date().toISOString().split('T')[0]);
@@ -24,6 +50,32 @@ const returnBook = async (id, isbn) => {
   ElMessage.success('归还成功！');
   await getBorrowByReaderId();
 }
+
+
+const payFor = async (id) => {
+  await payBookService(id);
+  ElMessage.success('缴款成功！');
+  await getBorrowByReaderId();
+}
+
+//续借日期
+const dueDate = ref(new Date());
+// 续借
+const returnDelayBook = async (id) => {
+  await returnDelayBookService(book.value.id, dueDate.value);
+  ElMessage.success('续借成功！');
+  await getBorrowByReaderId();
+}
+
+const isOverdue = (dueDate) => {
+  if (!dueDate) return true;
+  
+  const now = new Date();
+  const due = new Date(dueDate);
+  
+  // 如果当前时间超过了应还日期，则为逾期
+  return now <= due;
+};
 
 // 表格行背景颜色样式类
 const tableRowClassName = ({row}) => {
@@ -121,10 +173,12 @@ const deleteBorrowBatch = async () => {
                 <el-table-column sortable prop="borrowDate" label="借阅日期" width="150"/>
                 <el-table-column sortable prop="dueDate" label="应还日期" width="150"/>
                 <el-table-column sortable prop="returnDate" label="归还日期" width="150"/>
+                <el-table-column sortable prop="payment" label="欠款" width="80"/>
                 <el-table-column sortable prop="status" label="状态" width="100">
                   <template #default="scope">
-                    <el-tag v-if="scope.row.status === false" type="danger">未归还</el-tag>
-                    <el-tag v-else type="success">已归还</el-tag>
+                    <el-tag v-if="scope.row.status === false&&!scope.row.payment" type="danger">未归还</el-tag>
+                    <el-tag v-else-if="scope.row.status === true" type="success">已归还</el-tag>
+                    <el-tag v-else type="danger">已预期</el-tag>
                   </template>
                 </el-table-column>
 
@@ -135,8 +189,18 @@ const deleteBorrowBatch = async () => {
                                :disabled="scope.row.status">
                       归还
                     </el-button>
+                    <el-button link @click="showBorrow(scope.row)"
+                               type="primary" size="small"
+                               :disabled="scope.row.status|| !!scope.row.payment">
+                      续借
+                    </el-button>
+                    <el-button link @click="payFor(scope.row.id)"
+                               type="primary" size="small"
+                               :disabled="!scope.row.payment">  
+                      缴款
+                    </el-button>
                     <el-button link @click="deleteById(scope.row.id)"
-                               :disabled="!scope.row.status" type="danger" size="small">
+                               :disabled="!scope.row.status||scope.row.payment" type="danger" size="small">
                       删除记录
                     </el-button>
                   </template>
@@ -147,6 +211,46 @@ const deleteBorrowBatch = async () => {
         </el-main>
       </el-container>
     </el-container>
+    <!-- <div class="block">
+      <el-date-picker
+        v-model="dueDate"
+        type="datetime"
+        placeholder="选择归还日期"
+        format="YYYY-MM-DD"
+        date-format="MMM DD, YYYY"
+        time-format="HH:mm"
+        :disabled-date="disabledDate"
+      />
+      </div> -->
+      <el-drawer v-model="showDrawer">
+                <template #header>
+                  <h1>借阅</h1>
+                </template>
+                <el-image
+                  style="width: 100px; height: 150px"
+                  :src="book.cover"
+                  :fit="'fill'"
+                />
+                <h3 style="color: #409eff">选择归还日期</h3>
+
+                <div class="block">
+                  <el-date-picker
+                    v-model="dueDate"
+                    type="datetime"
+                    placeholder="选择归还日期"
+                    format="YYYY-MM-DD"
+                    date-format="MMM DD, YYYY"
+                    time-format="HH:mm"
+                    :disabled-date="disabledDate"
+                  />
+                </div>
+                <template #footer>
+                  <div style="flex: auto">
+                    <el-button>取消</el-button>
+                    <el-button type="primary" @click="returnDelayBook()">提交</el-button>
+                  </div>
+                </template>
+              </el-drawer>
   </div>
 </template>
 

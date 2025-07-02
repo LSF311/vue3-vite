@@ -10,6 +10,13 @@ const getAllReaderService = (condition) => {
     return request.post('/reader', condition);
 }
 
+const updateEnableService = function (reader) {
+    return request.post(`/reader/enable/${reader}`);
+};
+const updateDisableService = function (reader) {
+    return request.post(`/reader/disable/${reader}`);
+};
+
 
 // 根据id删除读者信息
 const deleteReaderService = (id) => {
@@ -18,5 +25,7 @@ const deleteReaderService = (id) => {
 export {
     updateReaderService,
     getAllReaderService,
-    deleteReaderService
+    deleteReaderService,
+    updateEnableService,
+    updateDisableService
 };

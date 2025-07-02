@@ -6,6 +6,9 @@ import HeaderView from "@/components/HeaderView.vue";
 import { Search } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { borrowService } from "@/methods/borrow.js";
+import { useReaderStore } from "@/stores/reader.js";
+
+const readerStore = useReaderStore();
 
 const tableData = ref([]);
 
@@ -83,10 +86,18 @@ let showDrawer = ref(false);
 const showBorrow = (row) => {
   showDrawer.value = true;
   book.value = row;
+  console.log("showBorrow book:", book.value);
+  console.log(row)
 };
 
 //借阅
 const borrow = async () => {
+  console.log(readerStore.reader.enable);
+  if(readerStore.reader.enable == '0') {
+    ElMessage.error("您的账号已被禁用，请联系管理员");
+    return;
+  }
+  console.log("借阅书籍:", book.value);
   await borrowService(book.value.isbn, dueDate.value);
   ElMessage.success("借阅成功");
   showDrawer.value = false;
@@ -98,7 +109,8 @@ const borrow = async () => {
 const disabledDate = (time) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return time.getTime() < today.getTime();
+  // return time.getTime() < today.getTime();
+  return false
 };
 </script>
 <!-- --------------------------------------- 一条朴实的分割线 ----------------------------------------- -->
@@ -170,6 +182,8 @@ const disabledDate = (time) => {
                 <el-table-column prop="title" label="书名" width="150" />
                 <el-table-column prop="author" label="作者" width="150" />
                 <el-table-column prop="isbn" label="ISBN" width="150" />
+                <el-table-column prop="press" label="出版社" width="150" />
+                <el-table-column prop="category" label="类别" width="150" />
                 <el-table-column
                   sortable
                   prop="number"

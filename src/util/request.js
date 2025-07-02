@@ -1,11 +1,15 @@
 import axios from "axios";
-import {ElMessage} from "element-plus";
+import { ElMessage } from "element-plus";
 import router from "@/router";
-import {useTokenStore} from "@/stores/token.js";
+import { useTokenStore } from "@/stores/token.js";
+import { useReaderStore } from "@/stores/reader.js";
 
 const baseURL = "/api";
-const instance = axios.create({baseURL});
+const instance = axios.create({
+    baseURL
+});
 const tokenStore = useTokenStore();
+const readerStore = useReaderStore();
 
 
 //响应拦截器，状态码为2xx时执行成功回调，否则执行失败回调
@@ -24,7 +28,10 @@ instance.interceptors.response.use(
         const code = error.response.status;
         switch (code) {
             case 401:
-                ElMessage({message: '请先登录！', type: "error",});
+                ElMessage({
+                    message: '请先登录！',
+                    type: "error",
+                });
                 break;
             case 419:
                 ElMessage.error("身份已过期,请重新登录！");
@@ -51,11 +58,24 @@ instance.interceptors.request.use(
         }
         //如果有token，将token放入请求头中
         const token = tokenStore.token;
+        // console.log(tokenStore)
+        console.log(readerStore.reader.enable)  
+        // consolel.log(readerStore)
+        // const userid = useReaderStore.getUserId(); // 获取用户ID
+        if( readerStore.reader.id) {
+            config.headers['userid'] = readerStore.reader.id; // 将用户ID放入请求头
+        }
+
+
+
         if (token != null) {
             config.headers['token'] = token;
         } else {
             router.push('/login');
-            ElMessage({message: '请先登录！', type: "error",});
+            ElMessage({
+                message: '请先登录！',
+                type: "error",
+            });
             return Promise.reject('token不存在！');
         }
         return config;

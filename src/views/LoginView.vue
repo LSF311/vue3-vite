@@ -29,6 +29,7 @@ let returnReader = reactive({
   age: "",
   tel: "",
   token: "",
+  enable: "",
 });
 
 const loginDto = ref({
@@ -44,6 +45,7 @@ const login = async function () {
   })
 
   const result = await loginService(loginDto.value);
+  console.log(result.data);
   returnReader = result.data;
 
   // console.log(returnReader);

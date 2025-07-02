@@ -7,7 +7,9 @@ import {Search} from "@element-plus/icons-vue";
 import {
   deleteReaderService,
   getAllReaderService,
-  updateReaderService
+  updateReaderService,
+  updateEnableService,
+  updateDisableService
 } from "@/methods/reader.js";
 import {ElMessage} from "element-plus";
 
@@ -17,9 +19,17 @@ onMounted(() => {
   getAllReaders();
 })
 
+// const handleClose = (done) => {
+//   // 执行关闭前的逻辑
+//   userInfo.value = false;
+//   // 调用 done() 确认关闭
+//   done();
+// };
+
 // 查询所有读者
 const getAllReaders = async () => {
   const result = await getAllReaderService(condition.value);
+  console.log(result.data);
   readerTable.value = result.data;
 }
 // 查询条件
@@ -66,6 +76,30 @@ const saveReader = async () => {
   await updateReaderService(reader.value);
 
   ElMessage.success('已保存！');
+  userInfo.value = false;
+  await getAllReaders();
+}
+
+// 启用读者借阅功能
+const saveEnable = async (id) => {
+  console.log(reader);
+
+  // await updateReaderByAdminService(reader.value);
+  await updateEnableService(id);
+
+  ElMessage.success('已启用！');
+  userInfo.value = false;
+  await getAllReaders();
+}
+
+// 禁用读者借阅功能
+const saveDisable = async (id) => {
+  console.log(reader);
+
+  // await updateReaderByAdminService(reader.value);
+  await updateDisableService(id);
+
+  ElMessage.success('已禁用！');
   userInfo.value = false;
   await getAllReaders();
 }
@@ -125,6 +159,12 @@ const handleClose = async ()=>{
                     <el-button @click="getReader(scope.row)" link type="primary" size="small">
                       修改
                     </el-button>
+                    <el-button v-if="scope.row.enable===0" @click="saveEnable(scope.row.id)" link type="primary" size="small">
+                      启用借阅
+                    </el-button>
+                    <el-button v-if="scope.row.enable===1" @click="saveDisable(scope.row.id)" link type="primary" size="small">
+                      禁用借阅
+                    </el-button>
                     <el-button @click="deleteById(scope.row.id)" link type="danger" size="small">
                       删除
                     </el-button>
@@ -134,7 +174,7 @@ const handleClose = async ()=>{
 
               <!--修改用户信息表单-->
               <el-dialog title="用户信息" width="40%" center align-center
-                         v-model="userInfo" :before-close="()=>{userInfo.value=false}">
+                         v-model="userInfo" :before-close="handleClose">
                 <el-form ref="ruleFormRef" :model="reader" status-icon
                          label-width="120px" class="centered-form">
 

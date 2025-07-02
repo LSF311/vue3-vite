@@ -25,6 +25,25 @@ const returnBookService = function (id, isbn) {
     });
 };
 
+const payBookService = function (id) {
+    console.log(id);
+    return request.post(`/borrow/payment/${id}`, {
+        params: {
+            id: id,
+        }
+    });
+};
+
+const returnDelayBookService = function (id, renewDate) {
+    console.log(id);
+    return request.get('/borrow/renewBook', {
+        params: {
+            id: id,
+            renewDate: renewDate
+        }
+    });
+};
+
 // 删除借书记录
 const deleteByIdService = function (id) {
     return request.delete('/borrow', {
@@ -41,6 +60,8 @@ export {
     getBorrowByReaderIdService,
     borrowService,
     returnBookService,
+    returnDelayBookService,
     deleteByIdService,
-    deleteBorrowBatchService
+    deleteBorrowBatchService,
+    payBookService
 };

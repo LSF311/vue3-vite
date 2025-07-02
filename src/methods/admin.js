@@ -5,7 +5,18 @@ import request from "@/util/request";
  * 更新管理员信息
  */
 const updateAdminService = function (admin) {
-    return request.put('/admin/update',admin);
+    return request.put('/admin/update', admin);
 };
 
-export {updateAdminService};
+const restoreService = function () {
+    return request.get('/admin/backup')
+}
+const backUpService = function () {
+    return request.get('/admin/backup')
+}
+
+export {
+    updateAdminService,
+    restoreService,
+    backUpService
+};

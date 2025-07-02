@@ -154,6 +154,7 @@ const handleClose = async ()=>{
                 <el-table-column sortable prop="gender" label="性别" width="100"/>
                 <el-table-column sortable prop="age" label="年龄" width="80"/>
                 <el-table-column sortable prop="tel" label="电话" width="150"/>
+                <el-table-column sortable prop="payment" label="罚款" width="80"/>
                 <el-table-column label="操作" width="180">
                   <template #default="scope">
                     <el-button @click="getReader(scope.row)" link type="primary" size="small">

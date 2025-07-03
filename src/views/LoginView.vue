@@ -95,6 +95,7 @@ const adminLogin = async function () {
 // 提交表单
 const submitForm = async (formEl) => {
   if (!formEl) return;
+  console.log(formEl)
   formEl.validate(async (valid) => {
     if (valid) {
       // 判断是否为管理员登录

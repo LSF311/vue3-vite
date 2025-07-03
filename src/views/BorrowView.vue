@@ -24,10 +24,14 @@ let book = ref({
   author: null,
 });
 
-const disabledDate = (time) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return time.getTime() < today.getTime();
+const disabledDateForRenew = (time, currentDueDate) => {
+  if (!currentDueDate) return false;
+  
+  const currentDue = new Date(currentDueDate);
+  currentDue.setHours(0, 0, 0, 0);
+  
+  // 新的归还日期不能早于当前的归还日期
+  return time.getTime() <= currentDue.getTime();
 };
 
 let showDrawer = ref(false);
@@ -241,7 +245,7 @@ const deleteBorrowBatch = async () => {
                     format="YYYY-MM-DD"
                     date-format="MMM DD, YYYY"
                     time-format="HH:mm"
-                    :disabled-date="disabledDate"
+                    :disabled-date="(time) => disabledDateForRenew(time, book.dueDate)"
                   />
                 </div>
                 <template #footer>

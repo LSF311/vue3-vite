@@ -109,8 +109,7 @@ const borrow = async () => {
 const disabledDate = (time) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  // return time.getTime() < today.getTime();
-  return false
+  return time.getTime() < today.getTime();
 };
 </script>
 <!-- --------------------------------------- 一条朴实的分割线 ----------------------------------------- -->
